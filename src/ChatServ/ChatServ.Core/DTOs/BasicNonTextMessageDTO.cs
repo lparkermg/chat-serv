@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChatServ.Core.Models
 {
-    public class BasicMessageDTO
+    public class BasicNonTextMessageDTO
     {
         public required string Sender { get; set; }
 

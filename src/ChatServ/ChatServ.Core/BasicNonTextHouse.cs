@@ -1,6 +1,8 @@
-﻿using ChatServ.Core.Interfaces;
+﻿using ChatServ.Core.Configuration;
+using ChatServ.Core.Interfaces;
 using ChatServ.Core.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,28 +13,32 @@ using System.Threading.Tasks;
 
 namespace ChatServ.Core
 {
-    public class BasicHouse<T> : IHouse<T> where T : class
+    public class BasicNonTextHouse : IHouse
     {
-        private IList<IRoom<T>> _rooms = new List<IRoom<T>>();
+        private IList<IRoom> _rooms = new List<IRoom>();
 
-        private readonly ILogger<BasicHouse<T>> _logger;
-        private readonly ILogger<BasicRoom<T>> _roomLogger;
+        private readonly ILogger<BasicNonTextHouse> _logger;
+        private readonly ILogger<IRoom> _roomLogger;
 
-        public BasicHouse(ILogger<BasicHouse<T>> logger, ILogger<BasicRoom<T>> roomLogger)
+        private readonly BasicNonTextHouseOptions _options;
+
+        public BasicNonTextHouse(ILogger<BasicNonTextHouse> logger, ILogger<IRoom> roomLogger, IOptions<BasicNonTextHouseOptions> options)
         {
             _logger = logger;
             _roomLogger = roomLogger;
+
+            _options = options.Value;
         }
 
         public string AddRoom(string id, string name, bool removeOnEmpty)
         {
-            var room = new BasicRoom<T>(_roomLogger, id, name, removeOnEmpty);
+            var room = new BasicNonTextRoom(_roomLogger, id, name, removeOnEmpty, _options.AvailableMessages);
             _rooms.Add(room);
 
             return id;
         }
 
-        public IRoom<T>? FindRoom(string id)
+        private IRoom? FindRoom(string id)
         {
             var room = _rooms.SingleOrDefault(r => r.Id == id);
 
@@ -47,11 +53,10 @@ namespace ChatServ.Core
 
         public bool TryRemoveRoom(string id)
         {
-            var room = _rooms.SingleOrDefault(r => r.Id == id);
+            var room = FindRoom(id);
 
             if (room == null)
             {
-                _logger.LogWarning("Room with id {id} not found.", id);
                 return false;
             }
 
@@ -97,6 +102,11 @@ namespace ChatServ.Core
                 await room.CloseRoom("House is closing down.");
             }
             _logger.LogDebug($"All rooms have been closed.");
+        }
+
+        public bool DoesRoomExist(string roomId)
+        {
+            return _rooms.Any(r => r.Id == roomId);
         }
     }
 }

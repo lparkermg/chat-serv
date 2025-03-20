@@ -17,20 +17,21 @@ namespace ChatServ.Core
     /// </summary>
     /// <typeparam name="T">The type of message the room will handle.</typeparam>
     /// <param name="logger">Logging for the room.</param>
-    public class BasicRoom<T>(ILogger<BasicRoom<T>> logger, string id, string name, bool shouldRemoveOnNoConnections) : IRoom<T>
-        where T : class
+    public class BasicNonTextRoom(ILogger<IRoom> logger, string id, string name, bool shouldRemoveOnNoConnections, string[] validMessages) : IRoom
     {
         public string Id { get; private set; } = id;
         public string Name { get; private set; } = name;
 
         public bool ShouldRemove { get; private set; } = false;
 
-        private readonly Channel<T> _channel = Channel.CreateUnbounded<T>();
-        private readonly ILogger<BasicRoom<T>> _logger = logger;
+        private readonly Channel<BasicNonTextMessageDTO> _channel = Channel.CreateUnbounded<BasicNonTextMessageDTO>();
+        private readonly ILogger<IRoom> _logger = logger;
 
         private readonly IList<WebSocket> _connections = new List<WebSocket>();
 
         private readonly bool _removeOnNoConnections = shouldRemoveOnNoConnections;
+
+        private readonly string[] _validMessages = validMessages;
 
         public void AddConnection(WebSocket connection)
         {
@@ -70,9 +71,9 @@ namespace ChatServ.Core
             {
                 result = await connection.ReceiveAsync(new ArraySegment<byte>(buf), CancellationToken.None);
 
-                var data = JsonSerializer.Deserialize<T>(buf) ?? null;
+                var data = JsonSerializer.Deserialize<BasicNonTextMessageDTO>(buf) ?? null;
 
-                if (data != null)
+                if (data != null && _validMessages.Length <= data.Content)
                 {
                     await _channel.Writer.WriteAsync(data);
                 }
@@ -81,11 +82,13 @@ namespace ChatServ.Core
 
             // Send any message to connections.
             _logger.LogDebug("Sending messages to connections.");
-            while (_channel.Reader.TryRead(out var msg))
+            var msg = string.Empty;
+            while (_channel.Reader.TryRead(out var msgData))
             {
+                msg = $"{msgData.Sender}: {_validMessages[msgData.Content]}";
                 foreach(var connection in _connections)
                 {
-                    await connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(msg)), WebSocketMessageType.Text, WebSocketMessageFlags.EndOfMessage, CancellationToken.None);
+                    await connection.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)), WebSocketMessageType.Text, WebSocketMessageFlags.EndOfMessage, CancellationToken.None);
                 }
             }
             _logger.LogDebug("Sent messages to connections.");

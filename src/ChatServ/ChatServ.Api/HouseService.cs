@@ -5,9 +5,9 @@ using ChatServ.Core.Models;
 
 namespace ChatServ.Api
 {
-    public class HouseService(IHouse<BasicMessageDTO> house) : IHostedService
+    public class HouseService(IHouse house) : IHostedService
     {
-        private readonly IHouse<BasicMessageDTO> _house = house;
+        private readonly IHouse _house = house;
 
         public Task StartAsync(CancellationToken cancellationToken)
         {

@@ -10,13 +10,15 @@ namespace ChatServ.Core.Interfaces
     /// <summary>
     /// Interface for the chat house, handling various chat rooms and connections.
     /// </summary>
-    public interface IHouse<T> where T : class
+    public interface IHouse
     {
         string AddRoom(string id, string name, bool removeOnEmpty);
 
         bool TryJoinRoom(string roomId, WebSocket connection);
 
         bool TryRemoveRoom(string id);
+
+        bool DoesRoomExist(string roomId);
 
         Task CloseHouse();
     }

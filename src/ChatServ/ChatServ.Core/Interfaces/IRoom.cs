@@ -10,7 +10,7 @@ namespace ChatServ.Core.Interfaces
     /// <summary>
     /// Interface for chat rooms which handles the actual chat along with receiving + sedning messages.
     /// </summary>
-    public interface IRoom<T> where T : class
+    public interface IRoom
     {
         public string Id { get; }
 
