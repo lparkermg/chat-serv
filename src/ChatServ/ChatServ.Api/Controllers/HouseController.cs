@@ -1,16 +1,19 @@
-﻿using ChatServ.Core.Interfaces;
+﻿using ChatServ.Api.Configuration;
+using ChatServ.Api.Models.Requests;
+using ChatServ.Core.Interfaces;
 using ChatServ.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ChatServ.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class HouseController(IHouse house) : ControllerBase
+    public class HouseController(IHouse house, IOptions<ApiOptions> options) : ControllerBase
     {
         private readonly IHouse _house = house;
-        // TODO: Options for getting base url etc
+        private readonly ApiOptions _apiOptions = options.Value;
 
         [HttpGet("room/{roomId}")]
         public IActionResult GetRoomUrl(string roomId)
@@ -19,7 +22,14 @@ namespace ChatServ.Api.Controllers
             {
                 return NotFound();
             }
-            return Ok($"/chat/{roomId}");
+            return Ok($"{_apiOptions.ChatBaseUrl}chat/{roomId}");
+        }
+
+        [HttpPost("room")]
+        public IActionResult CreateRoom([FromBody] CreateRoomRequest room)
+        {
+            _house.AddRoom(room.Id, room.Name, true);
+            return Created();
         }
     }
 }

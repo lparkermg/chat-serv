@@ -32,6 +32,12 @@ namespace ChatServ.Core
 
         public string AddRoom(string id, string name, bool removeOnEmpty)
         {
+            if(_rooms.Any(r => r.Id == id))
+            {
+                _logger.LogWarning("Room with id {id} already exists.", id);
+                return id;
+            }
+
             var room = new BasicNonTextRoom(_roomLogger, id, name, removeOnEmpty, _options.AvailableMessages);
             _rooms.Add(room);
 

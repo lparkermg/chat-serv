@@ -24,6 +24,9 @@ namespace ChatServ.Core
 
         public bool ShouldRemove { get; private set; } = false;
 
+        // This should be set via options, but hardcoding for now.
+        private DateTime? _shouldRemoveAt = DateTime.UtcNow.AddSeconds(30);
+
         private readonly Channel<BasicNonTextMessageDTO> _channel = Channel.CreateUnbounded<BasicNonTextMessageDTO>();
         private readonly ILogger<IRoom> _logger = logger;
 
@@ -38,6 +41,7 @@ namespace ChatServ.Core
             _logger.LogDebug("Adding connection to room {id}.", Id);
 
             _connections.Add(connection);
+            _shouldRemoveAt = null;
 
             _logger.LogDebug("Connection added to room {id}.", Id);
         }
@@ -45,6 +49,14 @@ namespace ChatServ.Core
         public async Task Process()
         {
             _logger.LogDebug("Processing room {id}", Id);
+
+            // No one has connected within the time limit, so we should remove the room.
+            if (_removeOnNoConnections && _shouldRemoveAt.HasValue && _shouldRemoveAt.Value < DateTime.UtcNow)
+            {
+                _logger.LogDebug("Flagging room for removal due to timeout.");
+                ShouldRemove = true;
+                return;
+            }
 
             // Remove any closed connections
             var closedConnections = _connections.Where(c => c.CloseStatus.HasValue);
@@ -56,7 +68,7 @@ namespace ChatServ.Core
             }
             _logger.LogDebug("Removed all closed conections.");
 
-            if (_removeOnNoConnections && _connections.Count() == 0)
+            if (_removeOnNoConnections && _connections.Count() == 0 && _shouldRemoveAt == null)
             {
                 _logger.LogDebug("Flagging room for removal due to no connections.");
                 ShouldRemove = true;
