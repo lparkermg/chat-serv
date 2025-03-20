@@ -21,4 +21,3 @@ RUN apk add icu-libs
 COPY --from=build /build/out .
 
 ENTRYPOINT ["dotnet", "ChatServ.Api.dll"]
-

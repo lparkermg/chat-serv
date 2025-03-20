@@ -8,15 +8,15 @@ services:
       - ASPNETCORE_URLS=https://+:5002
       - ASPNETCORE_Kestrel__Certificates__Default__Password=pAs5w0rd
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - CHATSERV_API_House__AvailableMessages__0=Hello!
-      - CHATSERV_API_House__AvailableMessages__1=How are you?
-      - CHATSERV_API_House__AvailableMessages__2=I'm good!
-      - CHATSERV_API_House__AvailableMessages__3=Not great...
-      - CHATSERV_API_Settings__ChatBaseUrl=ws://localhost:5020/
+      - CHATSERV_House__AvailableMessages__0=Hello!
+      - CHATSERV_House__AvailableMessages__1=How are you?
+      - CHATSERV_House__AvailableMessages__2=I'm good!
+      - CHATSERV_House__AvailableMessages__3=Not great...
+      - CHATSERV_Settings__ChatBaseUrl=wss://localhost:5002/
     volumes:
       - ${USERPROFILE}\.aspnet\https:/https/:ro
     ports:
-      - "5020:5020"
+      - "5002:5002"
     networks:
       chatserv_net:
 
