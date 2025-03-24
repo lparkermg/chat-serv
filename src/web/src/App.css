@@ -13,6 +13,25 @@
   min-width: 320px;
 }
 
+.chat-screen {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  min-width: 320px;
+}
+
+.chat-area {
+  height: 480px;
+  width: 320px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.chat-area > li {
+  text-align: left;
+}
+
 .room-form {
   display:flex;
   justify-content: center;

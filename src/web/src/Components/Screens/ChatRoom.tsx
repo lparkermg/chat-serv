@@ -33,7 +33,7 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
             const connection = new WebSocket(roomUrl, "string");
             connection.onopen = (ev: Event) => console.log("Connection openned", {ev});
             connection.onmessage = messageRecieved
-            connection.onclose = (ev: CloseEvent) => {
+            connection.onclose = () => {
                 onRoomDisconnected("Disconnected from the room");
             }
             connection.onerror = (ev: Event) => console.log("Connection error", {ev})
@@ -79,12 +79,12 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
 
     function messageRecieved(ev: MessageEvent)
     {
-        setMessages((old:string[]) => [...old, ev.data as string]);
+        setMessages((old:string[]) => [ev.data as string, ...old]);
     }
 
     const processedMessages = messages.map((v) => <li>{v}</li>)
 
-    return <section>
+    return <section className="chat-screen">
         <nav>
             <div>
                 <button onClick={() => sendMessage(0)}>Hello!</button>
@@ -96,7 +96,7 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
                 <button onClick={() => disconnectFromRoom()}>Leave</button>
             </div>
         </nav>
-        <ul>
+        <ul className="chat-area">
             {processedMessages}
         </ul>
     </section>
