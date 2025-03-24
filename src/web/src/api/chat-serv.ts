@@ -1,7 +1,7 @@
 import { CHATSERV_API_BASE_URL } from "../consts";
 
 export async function CreateRoom(id: string, name: string): Promise<boolean>{
-    const resp = await fetch(`${CHATSERV_API_BASE_URL}room`,{
+    const resp = await fetch(`${CHATSERV_API_BASE_URL}house/room`,{
         method: "POST",
         body: JSON.stringify({
             id,
@@ -18,7 +18,7 @@ export async function CreateRoom(id: string, name: string): Promise<boolean>{
 }
 
 export async function GetRoomUrl(id: string): Promise<string>{
-    const resp = await fetch(`${CHATSERV_API_BASE_URL}room/${id}`);
+    const resp = await fetch(`${CHATSERV_API_BASE_URL}house/room/${id}`);
     
     if(resp.status !== 200){
         return "";

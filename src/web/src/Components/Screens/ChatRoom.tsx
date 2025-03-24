@@ -30,11 +30,14 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
 
         try{
             const roomUrl = await api.GetRoomUrl(roomId)
-            const connection = new WebSocket(roomUrl);
-
+            const connection = new WebSocket(roomUrl, "string");
+            connection.onopen = (ev: Event) => console.log("Connection openned", {ev});
             connection.onmessage = messageRecieved
-            connection.onclose = (ev: CloseEvent) => onRoomDisconnected(ev.reason);
-
+            connection.onclose = (ev: CloseEvent) => {
+                console.log("Connection closed", {ev});
+                onRoomDisconnected(JSON.stringify(ev));
+            }
+            connection.onerror = (ev: Event) => console.log("Connection error", {ev})
             setRoomConnection(connection);
         }
         catch(err: any){
@@ -70,12 +73,14 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
             sender: username,
             content: messageId,
         }
-
-        roomConnection.send(JSON.stringify(message));
+        const parsedMessage = JSON.stringify(message);
+        const encoder = new TextEncoder()
+        roomConnection.send(encoder.encode(parsedMessage));
     }
 
     function messageRecieved(ev: MessageEvent)
     {
+        console.log("Message received", {ev});
         const updatedMessages = [...messages];
         updatedMessages.push(ev.data as string);
         setMessages(updatedMessages)
