@@ -20,6 +20,12 @@ namespace ChatServ.Core.Interfaces
 
         bool DoesRoomExist(string roomId);
 
+        IRoom? FindRoom(string roomId);
+
+        Task SendMessageToRoom(string roomId, string message);
+
+        Task ProcessHouse();
+
         Task CloseHouse();
     }
 }

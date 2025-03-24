@@ -18,11 +18,11 @@ namespace ChatServ.Core
         private IList<IRoom> _rooms = new List<IRoom>();
 
         private readonly ILogger<BasicNonTextHouse> _logger;
-        private readonly ILogger<IRoom> _roomLogger;
+        private readonly ILogger<BasicNonTextRoom> _roomLogger;
 
         private readonly BasicNonTextHouseOptions _options;
 
-        public BasicNonTextHouse(ILogger<BasicNonTextHouse> logger, ILogger<IRoom> roomLogger, IOptions<BasicNonTextHouseOptions> options)
+        public BasicNonTextHouse(ILogger<BasicNonTextHouse> logger, ILogger<BasicNonTextRoom> roomLogger, IOptions<BasicNonTextHouseOptions> options)
         {
             _logger = logger;
             _roomLogger = roomLogger;
@@ -44,7 +44,7 @@ namespace ChatServ.Core
             return id;
         }
 
-        private IRoom? FindRoom(string id)
+        public IRoom? FindRoom(string id)
         {
             var room = _rooms.SingleOrDefault(r => r.Id == id);
 
@@ -113,6 +113,18 @@ namespace ChatServ.Core
         public bool DoesRoomExist(string roomId)
         {
             return _rooms.Any(r => r.Id == roomId);
+        }
+
+        public async Task SendMessageToRoom(string roomId, string message)
+        {
+            var room = FindRoom(roomId);
+
+            if (room == null) 
+            {
+                return;
+            }
+
+            await room.AddMessage(message);
         }
     }
 }
