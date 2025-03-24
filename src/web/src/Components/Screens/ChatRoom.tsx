@@ -19,7 +19,7 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
 
     useEffect(() => {
         connectToRoom()
-    })
+    }, [])
 
     async function connectToRoom()
     {
@@ -80,10 +80,7 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
 
     function messageRecieved(ev: MessageEvent)
     {
-        console.log("Message received", {ev});
-        const updatedMessages = [...messages];
-        updatedMessages.push(ev.data as string);
-        setMessages(updatedMessages)
+        setMessages((old:string[]) => [...old, ev.data as string]);
     }
 
     const processedMessages = messages.map((v) => <li>{v}</li>)
