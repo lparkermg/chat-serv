@@ -13,18 +13,18 @@ function MainMenu({onFormSubmitted}: MainMenuProps){
 
         onFormSubmitted(username, roomId);
     }
-    return <section>
-        <form onSubmit={(e) => formSubmitted(e)}>
-            <label htmlFor="username">
+    return <section className="main-screen">
+        <form className="room-form" onSubmit={(e) => formSubmitted(e)}>
+            <label htmlFor="username" className="form-item">
                 <span>Username</span>
                 <input type="text" onChange={(e) => setUsername(e.target.value)} />
             </label>
-            <label htmlFor="room-id">
+            <label htmlFor="room-id" className="form-item-lg">
                 <span>Room Id</span>
                 <input type="text" onChange={(e) => setRoomId(e.target.value)} defaultValue={roomId} />
             </label>
-            <button type="submit">Connect!</button>
-            <button type="reset">Reset</button>
+            <button type="submit" className="form-item">Connect!</button>
+            <button type="reset" className="form-item">Reset</button>
         </form>
     </section>
 }

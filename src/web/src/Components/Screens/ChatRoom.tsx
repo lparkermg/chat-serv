@@ -34,15 +34,14 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
             connection.onopen = (ev: Event) => console.log("Connection openned", {ev});
             connection.onmessage = messageRecieved
             connection.onclose = (ev: CloseEvent) => {
-                console.log("Connection closed", {ev});
-                onRoomDisconnected(JSON.stringify(ev));
+                onRoomDisconnected("Disconnected from the room");
             }
             connection.onerror = (ev: Event) => console.log("Connection error", {ev})
             setRoomConnection(connection);
         }
         catch(err: any){
             console.error({err, msg: err.message});
-            onErrorConnectingToRoom(err.message);
+            onErrorConnectingToRoom(`Error connecting to room: ${err.message}`);
         }
     }
 
@@ -58,7 +57,7 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
         }
         catch(err: any){
             console.error({err, msg: "There was a problem disconnecting from this room"});
-            
+            onRoomDisconnected("There was a problem disconnecting from the room.")
         }
     }
 
