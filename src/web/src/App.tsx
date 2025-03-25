@@ -32,8 +32,6 @@ function App() {
     setErrorMessage(reason)
   }
 
-  
-
   return (
     <>
       {errorMessage !== undefined && <ErrorBar message={errorMessage}/>}

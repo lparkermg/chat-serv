@@ -85,15 +85,15 @@ function ChatRoom({roomId, username, onRoomDisconnected, onErrorConnectingToRoom
     const processedMessages = messages.map((v) => <li>{v}</li>)
 
     return <section className="chat-screen">
-        <nav>
-            <div>
+        <nav className="chat-screen-nav-bar">
+            <div className="chat-screen-nav-bar__item">
                 <button onClick={() => sendMessage(0)}>Hello!</button>
                 <button onClick={() => sendMessage(1)}>How are you?</button>
                 <button onClick={() => sendMessage(2)}>I'm good!</button>
                 <button onClick={() => sendMessage(3)}>Not great...</button>
             </div>
-            <div>
-                <button onClick={() => disconnectFromRoom()}>Leave</button>
+            <div className="chat-screen-nav-bar__item">
+                <button onClick={() => disconnectFromRoom()} className="btn-danger">Leave Room</button>
             </div>
         </nav>
         <ul className="chat-area">
