@@ -20,6 +20,8 @@ namespace ChatServ.Core.Interfaces
 
         void AddConnection(WebSocket connection);
 
+        Task AddMessage(string message);
+
         Task Process();
 
         Task CloseRoom(string message);

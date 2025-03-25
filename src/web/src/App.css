@@ -1,0 +1,90 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.main-screen {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  min-width: 320px;
+}
+
+.chat-screen {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  min-width: 320px;
+  flex-direction:column;
+}
+
+.chat-area {
+  height: 320px;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+  background-color: #313131;
+  border-radius: 1em;
+  list-style-type: none;
+}
+
+.chat-screen-nav-bar {
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  justify-content: center;
+}
+
+.chat-screen-nav-bar__item {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 0.25em;
+}
+
+.chat-screen-nav-bar__item > button {
+  margin-right: 0.25em;
+  margin-left: 0.25em;
+}
+
+.btn-danger {
+  border: 1px solid transparent;
+  background-color:#5e0d0d;
+  transition: background-color 0.25s;
+}
+
+.btn-danger:hover {
+  border-color:#f5cfcf;
+  background-color:#9e1717;
+}
+
+.chat-area > li {
+  text-align: left;
+}
+
+.room-form {
+  display:flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.form-item {
+  margin-bottom: 0.5em;
+}
+
+.form-item-lg {
+  margin-bottom: 1em;
+}
+
+.form-item > span {
+  margin-right: 0.25em;
+}
+
+.error-bar {
+  padding: 0.75em;
+  background-color: #5e0d0d;
+  border-radius: 1em;
+}

@@ -1,0 +1,1 @@
+export const CHATSERV_API_BASE_URL = "https://localhost:5002/";

@@ -4,6 +4,7 @@ using ChatServ.Core;
 using ChatServ.Core.Configuration;
 using ChatServ.Core.Interfaces;
 using ChatServ.Core.Models;
+using Microsoft.AspNetCore.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables("CHATSERV_");
@@ -16,12 +17,18 @@ builder.Services.AddSingleton<IHouse, BasicNonTextHouse>();
 
 builder.Services.AddHostedService<HouseService>();
 
+var ops = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2),
+};
 
+builder.Services.AddWebSockets(config => config = ops);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -32,9 +39,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
+
+app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().WithOrigins("https://localhost:5003", "https://identityserver:5003", "wss://localhost:5003"));
+
+
 
 app.UseWebSockets();
 app.MapControllers();

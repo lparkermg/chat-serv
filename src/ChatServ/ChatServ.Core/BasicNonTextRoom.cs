@@ -17,7 +17,7 @@ namespace ChatServ.Core
     /// </summary>
     /// <typeparam name="T">The type of message the room will handle.</typeparam>
     /// <param name="logger">Logging for the room.</param>
-    public class BasicNonTextRoom(ILogger<IRoom> logger, string id, string name, bool shouldRemoveOnNoConnections, string[] validMessages) : IRoom
+    public class BasicNonTextRoom(ILogger<BasicNonTextRoom> logger, string id, string name, bool shouldRemoveOnNoConnections, string[] validMessages) : IRoom
     {
         public string Id { get; private set; } = id;
         public string Name { get; private set; } = name;
@@ -28,7 +28,7 @@ namespace ChatServ.Core
         private DateTime? _shouldRemoveAt = DateTime.UtcNow.AddSeconds(30);
 
         private readonly Channel<BasicNonTextMessageDTO> _channel = Channel.CreateUnbounded<BasicNonTextMessageDTO>();
-        private readonly ILogger<IRoom> _logger = logger;
+        private readonly ILogger<BasicNonTextRoom> _logger = logger;
 
         private readonly IList<WebSocket> _connections = new List<WebSocket>();
 
@@ -46,6 +46,30 @@ namespace ChatServ.Core
             _logger.LogDebug("Connection added to room {id}.", Id);
         }
 
+        public async Task AddMessage(string message)
+        {
+            try
+            {
+                _logger.LogInformation(message);
+                var parsedMessage = JsonSerializer.Deserialize<BasicNonTextMessageDTO>(message, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                });
+
+                if (parsedMessage == null)
+                {
+                    _logger.LogWarning("Invalid message ({message}) could not be added to room {id}", message, Id);
+                    return;
+                }
+
+                await _channel.Writer.WriteAsync(parsedMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while adding message.");
+            }
+        }
+
         public async Task Process()
         {
             _logger.LogDebug("Processing room {id}", Id);
@@ -59,9 +83,9 @@ namespace ChatServ.Core
             }
 
             // Remove any closed connections
-            var closedConnections = _connections.Where(c => c.CloseStatus.HasValue);
+            var closedConnections = _connections.Where(c => c.CloseStatus.HasValue || c.State == WebSocketState.Closed).ToList();
 
-            _logger.LogDebug("Removing closed connections.");
+            _logger.LogDebug("Removing closed connections. {amount}", closedConnections.Count);
             foreach (var connection in closedConnections)
             {
                 _connections.Remove(connection);
@@ -74,23 +98,6 @@ namespace ChatServ.Core
                 ShouldRemove = true;
                 return;
             }
-
-            // Receive any messages from connections.
-            _logger.LogDebug("Receiving messages from connections.");
-            var buf = new byte[1024 * 4];
-            WebSocketReceiveResult? result = null;
-            foreach (var connection in _connections)
-            {
-                result = await connection.ReceiveAsync(new ArraySegment<byte>(buf), CancellationToken.None);
-
-                var data = JsonSerializer.Deserialize<BasicNonTextMessageDTO>(buf) ?? null;
-
-                if (data != null && _validMessages.Length <= data.Content)
-                {
-                    await _channel.Writer.WriteAsync(data);
-                }
-            }
-            _logger.LogDebug("Received messages from connections.");
 
             // Send any message to connections.
             _logger.LogDebug("Sending messages to connections.");
@@ -109,10 +116,12 @@ namespace ChatServ.Core
 
         public async Task CloseRoom(string message)
         {
-            foreach(var connection in _connections)
+            _logger.LogDebug("Closing room {id}.", Id);
+            foreach (var connection in _connections)
             {
                 await connection.CloseAsync(WebSocketCloseStatus.NormalClosure, $"Closing Room: {message}", CancellationToken.None);
             }
+            _logger.LogDebug("Room {id} closed.", Id);
         }
     }
 }
